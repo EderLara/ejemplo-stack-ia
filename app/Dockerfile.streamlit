@@ -1,0 +1,45 @@
+# Dockerfile.streamlit
+
+# FROM python:3.9-slim
+# Define la imagen base del contenedor
+# Usa Python 3.9 en su versión "slim" (ligera, sin paquetes innecesarios)
+# Esto reduce el tamaño de la imagen final y mejora el tiempo de construcción
+FROM python:3.9-slim
+
+# WORKDIR /app
+# Establece el directorio de trabajo dentro del contenedor
+# Todos los comandos siguientes se ejecutarán desde esta ubicación
+# Si la carpeta no existe, Docker la crea automáticamente
+WORKDIR /app
+
+# COPY requirements.txt .
+# Copia el archivo requirements.txt desde tu máquina local al contenedor
+# El punto (.) significa "copiar al directorio actual" (/app)
+# Se copia primero para aprovechar el caché de Docker en las capas
+COPY requirements.txt .
+
+# RUN pip install --no-cache-dir -r requirements.txt
+# Instala todas las dependencias de Python listadas en requirements.txt
+# --no-cache-dir: No guarda archivos de caché, reduciendo el tamaño de la imagen
+# -r requirements.txt: Lee las dependencias desde el archivo
+# Esto instala Streamlit, Requests, Pillow, etc.
+RUN pip install --no-cache-dir -r requirements.txt
+
+# COPY app.py .
+# Copia el archivo app.py (la aplicación Streamlit) al contenedor
+# Este es el código principal que se ejecutará
+COPY app.py .
+
+# EXPOSE 8501
+# Documenta que el contenedor escuchará en el puerto 8501
+# Este es el puerto predeterminado de Streamlit
+# Nota: Esto es solo documentación, no abre el puerto automáticamente
+# El puerto se mapea realmente en docker-compose.yml
+EXPOSE 8501
+
+# CMD ["streamlit", "run", "app.py", "--server.address=0.0.0.0"]
+# Define el comando que se ejecutará cuando el contenedor inicie
+# streamlit run app.py: Ejecuta la aplicación Streamlit
+# --server.address=0.0.0.0: Permite conexiones desde cualquier IP
+# Esto es necesario para que puedas acceder desde tu navegador (localhost:8501)
+CMD ["streamlit", "run", "app.py", "--server.address=0.0.0.0"]

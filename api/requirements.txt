@@ -1,0 +1,5 @@
+flask
+tf-nightly
+tensorflow
+pillow
+numpy

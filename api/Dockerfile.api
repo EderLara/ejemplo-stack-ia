@@ -1,0 +1,53 @@
+# Dockerfile.api
+
+# FROM python:3.9-slim
+# Define la imagen base del contenedor
+# Usa Python 3.9 en su versión "slim" (ligera, sin paquetes innecesarios)
+# Esta versión es más pequeña pero suficiente para ejecutar Flask y TensorFlow
+FROM python:3.9-slim
+
+# WORKDIR /app
+# Establece el directorio de trabajo dentro del contenedor
+# Todos los comandos siguientes se ejecutarán desde /app
+# Si la carpeta no existe, Docker la crea automáticamente
+WORKDIR /app
+
+# RUN apt-get update && apt-get install -y libgl1-mesa-glx
+# Instala dependencias del sistema operativo necesarias para librerías de visión
+# apt-get update: Actualiza la lista de paquetes disponibles
+# apt-get install -y: Instala paquetes sin pedir confirmación
+# libgl1-mesa-glx: Librería OpenGL necesaria para OpenCV y procesamiento de imágenes
+# Esto previene errores al cargar imágenes con PIL/OpenCV
+RUN apt-get update && apt-get install -y libgl1-mesa-glx
+
+# COPY requirements.txt .
+# Copia el archivo requirements.txt desde tu máquina local al contenedor
+# El punto (.) significa "copiar al directorio actual" (/app)
+# Se copia primero para aprovechar el caché de Docker en las capas
+COPY requirements.txt .
+
+# RUN pip install --no-cache-dir -r requirements.txt
+# Instala todas las dependencias de Python listadas en requirements.txt
+# --no-cache-dir: No guarda archivos de caché, reduciendo el tamaño de la imagen
+# -r requirements.txt: Lee las dependencias desde el archivo
+# Esto instala Flask, TensorFlow, Pillow, NumPy, etc.
+RUN pip install --no-cache-dir -r requirements.txt
+
+# COPY api.py .
+# Copia el archivo api.py (el código de la API Flask) al contenedor
+# Este es el código principal que maneja las peticiones HTTP y las predicciones
+COPY api.py .
+
+# EXPOSE 5000
+# Documenta que el contenedor escuchará en el puerto 5000
+# Este es el puerto predeterminado de Flask
+# Nota: Esto es solo documentación, no abre el puerto automáticamente
+# El puerto se mapea realmente en docker-compose.yml
+EXPOSE 5000
+
+# CMD ["python", "api.py"]
+# Define el comando que se ejecutará cuando el contenedor inicie
+# python api.py: Ejecuta el servidor Flask
+# Esto inicia la API que escucha peticiones en 0.0.0.0:5000
+# La API estará lista para recibir imágenes y devolver predicciones
+CMD ["python", "api.py"]

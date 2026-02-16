@@ -1,0 +1,28 @@
+services:
+  flask_api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.api
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./modelo_optimizado.h5:/app/modelo_optimizado.h5
+    networks:
+      - ai-network
+
+  streamlit_app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.streamlit
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://flask_api:5000/predict
+    depends_on:
+      - flask_api
+    networks:
+      - ai-network
+
+networks:
+  ai-network:
+    driver: bridge
